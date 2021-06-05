@@ -86,8 +86,12 @@ set(handles.radiobutton1, 'value', 1);%continuous plant
 set(handles.edit1, 'string','1');%numerator
 set(handles.edit2, 'string','[10 1]');%denominator
 set(handles.edit4, 'string','3');%plant delay tau (or d for discrete plant)
+
+% 'Ashry - Add auxilary poles'
 set(handles.edit14, 'string','0');
 set(handles.edit15, 'string','0');
+% 'Ashry - Add auxilary poles'
+
 %}
 %{
 set(handles.radiobutton2, 'value', 1);%discrete plant
@@ -415,6 +419,8 @@ function P=z_polynomial(w0, zeta, Ts, handles)
 s=w0*(-zeta+i*sqrt(1-zeta*zeta));
 z=exp(s*Ts);
 rez=real(z); imz=imag(z);
+
+% 'Ashry - Add auxilary poles'
 P_No_aux=[1, -2*rez, rez*rez+imz*imz];
 plant_order = length(str2num(get(handles.edit2, 'string')));
 
@@ -431,7 +437,7 @@ if plant_order == 3
     P = conv(P_No_aux,conv([1 -alpha_1],[1 -alpha_2]));
     
 end
-    
+% 'Ashry - Add auxilary poles'    
 
 function lz=count_leading_zeros(v)
 size_v=size(v);
@@ -660,7 +666,7 @@ T=str2num(get(handles.edit10, 'string'));
 plot_responses(c_r, c_D, U_r, U_D, Ts, handles);
 
 
-
+% 'Ashry - Add auxilary poles'
 function edit14_Callback(hObject, eventdata, handles)
 % hObject    handle to edit14 (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -704,3 +710,4 @@ function edit15_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+% 'Ashry - Add auxilary poles'
