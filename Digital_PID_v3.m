@@ -22,7 +22,7 @@ function varargout = Digital_PID_v3(varargin)
 
 % Edit the above text to modify the response to help Digital_PID_v3
 
-% Last Modified by GUIDE v2.5 26-Mar-2010 13:31:53
+% Last Modified by GUIDE v2.5 28-May-2021 05:08:22
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -86,6 +86,8 @@ set(handles.radiobutton1, 'value', 1);%continuous plant
 set(handles.edit1, 'string','1');%numerator
 set(handles.edit2, 'string','[10 1]');%denominator
 set(handles.edit4, 'string','3');%plant delay tau (or d for discrete plant)
+set(handles.edit14, 'string','0');
+set(handles.edit15, 'string','0');
 %}
 %{
 set(handles.radiobutton2, 'value', 1);%discrete plant
@@ -409,11 +411,27 @@ function uipanel1_ButtonDownFcn(hObject, eventdata, handles)
 
 
 
-function P=z_polynomial(w0, zeta, Ts)
+function P=z_polynomial(w0, zeta, Ts, handles)
 s=w0*(-zeta+i*sqrt(1-zeta*zeta));
 z=exp(s*Ts);
 rez=real(z); imz=imag(z);
-P=[1, -2*rez, rez*rez+imz*imz];
+P_No_aux=[1, -2*rez, rez*rez+imz*imz];
+plant_order = length(str2num(get(handles.edit2, 'string')));
+
+
+
+alpha_1 = str2double(get(handles.edit14, 'string'));
+alpha_2 = str2double(get(handles.edit15, 'string'));
+
+if plant_order == 2
+    P = conv(P_No_aux,[1 -alpha_1]);
+end
+
+if plant_order == 3
+    P = conv(P_No_aux,conv([1 -alpha_1],[1 -alpha_2]));
+    
+end
+    
 
 function lz=count_leading_zeros(v)
 size_v=size(v);
@@ -497,7 +515,7 @@ set(handles.edit12, 'string',['[' num2str(A) ']']);
 %GET REGULATION CHAR. POL.
 w0  =str2double(get(handles.edit5, 'string'));
 zeta=str2double(get(handles.edit6, 'string'));
-P=z_polynomial(w0, zeta, Ts);
+P=z_polynomial(w0, zeta, Ts, handles);
 set(handles.edit7, 'string',['[' num2str(P) ']']);
 BW=max([BW w0]);%rad/s
 set(handles.figure1, 'NumberTitle','off', 'Name',sprintf('Digital PID v3. Nyquist period=%fs.', pi/BW));%%
@@ -641,3 +659,48 @@ T=str2num(get(handles.edit10, 'string'));
 [c_r c_D U_r U_D]=calculate_CLTFs(Bp, Ap, R, S, T);
 plot_responses(c_r, c_D, U_r, U_D, Ts, handles);
 
+
+
+function edit14_Callback(hObject, eventdata, handles)
+% hObject    handle to edit14 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit14 as text
+%        str2double(get(hObject,'String')) returns contents of edit14 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit14_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit14 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function edit15_Callback(hObject, eventdata, handles)
+% hObject    handle to edit15 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of edit15 as text
+%        str2double(get(hObject,'String')) returns contents of edit15 as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function edit15_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to edit15 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
