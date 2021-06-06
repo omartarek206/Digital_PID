@@ -84,10 +84,10 @@ guidata(hObject, handles);
 set(handles.radiobutton1, 'value', 1);%continuous plant
     %continuous plant
 set(handles.edit1, 'string','1');%numerator
-set(handles.edit2, 'string','[10 1]');%denominator
+set(handles.edit2, 'string','[1 10 1]');%denominator
 set(handles.edit4, 'string','3');%plant delay tau (or d for discrete plant)
-set(handles.edit14, 'string','0');
-set(handles.edit15, 'string','0');
+set(handles.edit14, 'string','0.15');
+set(handles.edit15, 'string','0.15');
 %}
 %{
 set(handles.radiobutton2, 'value', 1);%discrete plant
@@ -98,7 +98,7 @@ set(handles.edit4, 'string','0');%plant delay d (or tau for continuous plant)
 %}
 set(handles.edit3, 'string','5');%Ts
     %regulation
-set(handles.edit5, 'string','0.05');%w0
+set(handles.edit5, 'string','0.25');%w0
 set(handles.edit6, 'string','0.8');%zeta
 pushbutton1_Callback(handles.pushbutton1, 0, handles);
 
@@ -597,15 +597,21 @@ a2.XLabel.String = 'Time (sec)'; a2.YLabel.String = 'Amplitude';
 set(a2, 'XMinorGrid','on', 'YMinorGrid','on');
 title(a2, sprintf('Control signal, step disturbance at %g s', t_dist*Ts));
 
-[H,W] = freqz(c_D.num{:}, c_D.den{:});
-plot(a3, (W)/(2*pi), 20*log10(abs(H)));
+[H_Low_dB, F_Low] = robust_templates('L');
+[H_Hi_dB, F_Hi] = robust_templates('H');
+
+[H0,W0] = freqz(c_D.num{:}, c_D.den{:});
+F = (W0)/(2*pi); H = 20*log10(abs(H0));
+plot(a3, F, H, F_Low, H_Low_dB, '--black', F_Hi, H_Hi_dB, '--black');   %' Omar Tarek - Overlay figures'
 a3.XLabel.String = 'Normalized Frequency (F/Fs)'; a3.YLabel.String = 'Amplitude (dB)';
-a3.YLim = [20*log10(abs(H(2))) 10];
+a3.YLim = [H(2) 10];
+hold(a3, 'on'); %' Omar Tarek - Overlay figures'
 set(a3, 'XMinorGrid','on', 'YMinorGrid','on');
 title(a3, sprintf('Plant output senstivity function (Syp)'));
 
-[H,W] = freqz(U_D.num{:}, U_D.den{:});
-plot(a4, (W)/(2*pi), 20*log10(abs(H)));
+[H1, W1] = freqz(U_D.num{:}, U_D.den{:});
+F = (W1)/(2*pi); H = 20*log10(abs(H1));
+plot(a4, F, H);
 a4.XLabel.String = 'Normalized Frequency (F/Fs)'; a4.YLabel.String = 'Amplitude (dB)';
 set(a4, 'XMinorGrid','on', 'YMinorGrid','on');
 title(a4, sprintf('Control signal senstivity function (Sup)'));
@@ -615,13 +621,29 @@ dcm.Enable = 'on';
 dcm.DisplayStyle = 'datatip';
 %' Omar Tarek - Add Syp and Sup graphs'
 
-
-
-
-
-
-
-
+%' Omar Tarek - Add Syp robust templates'
+function [Hr, Fr] = robust_templates(selection)
+if selection == 'H'
+    [H_Hi,W_Hi] = freqz(1,[1 -1]);
+    H_Hi_dB = 20*log10(1+abs(H_Hi)); F_Hi = (W_Hi)/(2*pi);
+    for i = 1:size(H_Hi_dB)
+        if (H_Hi_dB(i) > 6)
+            H_Hi_dB(i) = 6 ;
+        end
+    end
+    Hr = H_Hi_dB; Fr = F_Hi;
+elseif selection == 'L'
+    [H_Low,W_Low] = freqz(1,[1 -1]);
+    H_Low_dB = 20*log10(1-abs(H_Low)); F_Low = (W_Low)/(2*pi);
+    for i = 1:size(H_Low_dB)
+        H_Low_dB(i) = -inf;
+        if (H_Low_dB(i+1) < -55)
+            break;
+        end
+    end
+    Hr = H_Low_dB; Fr = F_Low;
+end
+%' Omar Tarek - Add Syp robust templates'
 
 % --- Executes on button press in pushbutton1.
 function pushbutton1_Callback(hObject, eventdata, handles)          %solve
