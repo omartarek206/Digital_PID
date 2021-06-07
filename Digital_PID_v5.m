@@ -22,7 +22,7 @@ function varargout = Digital_PID_v5(varargin)
 
 % Edit the above text to modify the response to help Digital_PID_v5
 
-% Last Modified by GUIDE v2.5 04-Jun-2021 03:40:36
+% Last Modified by GUIDE v2.5 07-Jun-2021 03:29:24
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -605,7 +605,6 @@ F = (W0)/(2*pi); H = 20*log10(abs(H0));
 plot(a3, F, H, F_Low, H_Low_dB, '--black', F_Hi, H_Hi_dB, '--black');   %' Omar Tarek - Overlay figures'
 a3.XLabel.String = 'Normalized Frequency (F/Fs)'; a3.YLabel.String = 'Amplitude (dB)';
 a3.YLim = [H(2) 10];
-hold(a3, 'on'); %' Omar Tarek - Overlay figures'
 set(a3, 'XMinorGrid','on', 'YMinorGrid','on');
 title(a3, sprintf('Plant output senstivity function (Syp)'));
 
@@ -616,9 +615,12 @@ a4.XLabel.String = 'Normalized Frequency (F/Fs)'; a4.YLabel.String = 'Amplitude 
 set(a4, 'XMinorGrid','on', 'YMinorGrid','on');
 title(a4, sprintf('Control signal senstivity function (Sup)'));
 
+
 dcm = datacursormode;
 dcm.Enable = 'on';
 dcm.DisplayStyle = 'datatip';
+
+
 %' Omar Tarek - Add Syp and Sup graphs'
 
 %' Omar Tarek - Add Syp robust templates'
@@ -755,3 +757,15 @@ function edit15_CreateFcn(hObject, eventdata, handles)
 if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
     set(hObject,'BackgroundColor','white');
 end
+
+% 'Omar Tarek - Add clear button'
+% --- Executes on button press in pushbutton3.
+function pushbutton3_Callback(hObject, eventdata, handles)
+% hObject    handle to pushbutton3 (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+cla(handles.axes1);
+cla(handles.axes2);
+cla(handles.axes3);
+cla(handles.axes4);
+% 'Omar Tarek - Add clear button'
